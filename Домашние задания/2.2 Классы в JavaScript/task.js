@@ -115,3 +115,38 @@ console.log(dune.state);
 // Добавляем восстановленную книгу
 lib.addBook(dune);
 console.log(lib.books);
+
+class Student {
+	constructor(name) {
+		this.name = name
+		this.marks = {}
+	}
+	
+	addMark(mark, subject) {
+		if ((mark < 2) || (mark > 5)) {
+			return;
+		}
+		if (!(subject in this.marks)) {
+			this.marks[subject] = [];
+		}
+		this.marks[subject].push(mark);
+	}
+	
+	getAverageBySubject(subject) {
+		if (!(subject in this.marks)) {
+			return 0;
+		}
+		let subjMarks = this.marks[subject];
+		let subjectSum = subjMarks.reduce((sum, mark) => sum + mark);
+		return subjectSum / subjMarks.length;
+	}
+	
+	getAverage() {
+		let subjects = Object.keys(this.marks);
+		if (subjects.length === 0) {
+			return 0;
+		}
+		let totalSum = subjects.reduce((sum, subject) => sum + this.getAverageBySubject(subject), 0);
+		return totalSum / subjects.length;
+	}
+}
