@@ -22,15 +22,11 @@ class Weapon {
   }
   
   getDamage() {
-    if (this.durability === Infinity) {
-      return this.attack;
-    }
-    
     if (this.durability <= 0) {
       return 0;
     }
     
-    const curDamage = this.durability / this.initDurability >= 0.3 ? this.attack : this.attack / 2;
+    const curDamage = this.durability / this.initDurability < 0.3 ? this.attack / 2 : this.attack;
     
     return curDamage;
   }
@@ -75,7 +71,7 @@ class LongBow extends Bow {
     super();
     this.name = 'Длинный лук';
     this.attack = 15;
-    this.range = 4
+    this.range = 4;
   }
 }
 
@@ -84,7 +80,8 @@ class Axe extends Sword {
     super();
     this.name = 'Секира';
     this.attack = 27;
-    this.durability = 800
+    this.durability = 800;
+    this.initDurability = 800;
   }
 }
 
@@ -93,6 +90,6 @@ class StormStaff extends Staff {
     super();
     this.name = 'Посох Бури';
     this.attack = 10;
-    this.range = 3
+    this.range = 3;
   }
 }
