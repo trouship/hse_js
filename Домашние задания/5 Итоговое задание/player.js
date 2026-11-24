@@ -24,7 +24,7 @@ class Player {
       return 0;
     }
     
-    return (this.attack + this.weapon.getDamage()) * getLuck() / distance;
+    return (this.attack + this.weapon.getDamage()) * this.getLuck() / distance;
   }
   
   takeDamage(damage) {
@@ -55,32 +55,32 @@ class Player {
   
   move(distance) {
     if (distance < 0) {
-      moveLeft(distance);
+      this.moveLeft(distance);
     }
     else {
-      moveRight(distance);
+      this.moveRight(distance);
     }
   }
   
   isAttackBlocked() {
-    return getLuck() > (100 - this.luck) / 100;
+    return this.getLuck() > (100 - this.luck) / 100;
   }
   
   dodged() {
-    return getLuck() > (100 - this.agility - this.speed * 3) / 100;
+    return this.getLuck() > (100 - this.agility - this.speed * 3) / 100;
   }
   
   takeAttack(damage) {
-    if (dodged()) {
+    if (this.dodged()) {
       return;
     }
     
-    if (isAttackBlocked()) {
+    if (this.isAttackBlocked()) {
       this.weapon.takeDamage(damage);
       return;
     }
     
-    takeDamage(damage);
+    this.takeDamage(damage);
   }
   
   checkWeapon() {

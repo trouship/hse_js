@@ -26,6 +26,10 @@ class Weapon {
       return this.attack;
     }
     
+    if (this.durability <= 0) {
+      return 0;
+    }
+    
     const curDamage = this.durability / this.initDurability >= 0.3 ? this.attack : this.attack / 2;
     
     return curDamage;
