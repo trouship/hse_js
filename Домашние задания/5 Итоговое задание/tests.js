@@ -80,7 +80,8 @@ describe('Итоговое домашнее задание', () => {
     describe('Player', () => {
       it('getDamage(distance)', () => {
         let player = new Player(10, "Человек паук");
-        expect(player.getDamage(1)).toBeGreaterThan(0);
+        spyOn(player, 'getLuck').and.returnValue(0.5);
+        expect(player.getDamage(1)).toBeCloseTo(5.5, 10);
         expect(player.getDamage(2)).toEqual(0);
         expect(player.getDamage(4)).toEqual(0);
       });
@@ -111,6 +112,138 @@ describe('Итоговое домашнее задание', () => {
         
         player.takeDamage(90);
         expect(player.life).toEqual(0);
+      });
+    });
+    
+    describe('Особенности классов', () => {  
+      it('Warrior', () => {
+        let warrior = new Warrior(10, "Алёша Попович");
+        console.log(warrior.life, warrior.magic); // 120 20
+        expect(warrior.life).toEqual(120);
+        expect(warrior.magic).toEqual(20);
+        
+        const luckValues = [0.9, 0.5, 0.5, 0.5, 0.5];
+        let luckIndex = 0;
+        spyOn(warrior, 'getLuck').and.callFake(() => luckValues[luckIndex++]);
+        
+        warrior.takeDamage(50);
+        expect(warrior.life).toEqual(70);
+        expect(warrior.magic).toEqual(20);
+
+        warrior.takeDamage(20);
+        expect(warrior.life).toEqual(50);
+        expect(warrior.magic).toEqual(20);
+
+        warrior.takeDamage(5); 
+        expect(warrior.life).toEqual(50);
+        expect(warrior.magic).toEqual(15);
+
+        warrior.takeDamage(7); 
+        expect(warrior.life).toEqual(43);
+        expect(warrior.magic).toEqual(15);
+
+        warrior.takeDamage(5);
+        expect(warrior.life).toEqual(38);
+        expect(warrior.magic).toEqual(15);
+
+        warrior.takeDamage(22);
+        expect(warrior.life).toEqual(16);
+        expect(warrior.magic).toEqual(15);
+
+        warrior.takeDamage(30);
+        expect(warrior.life).toEqual(0);
+        expect(warrior.magic).toEqual(15);
+      });
+      
+      it('Mage', () => {
+        const mage = new Mage(10, 'Гендальф');
+        expect(mage.life).toEqual(70);
+        expect(mage.magic).toEqual(100);
+
+        mage.takeDamage(50);
+        expect(mage.life).toEqual(45);
+        expect(mage.magic).toEqual(88);
+
+        mage.takeDamage(20);
+        expect(mage.life).toEqual(35);
+        expect(mage.magic).toEqual(76);
+
+        mage.takeDamage(10);
+        expect(mage.life).toEqual(30);
+        expect(mage.magic).toEqual(64);
+
+        mage.takeDamage(20);
+        expect(mage.life).toEqual(20);
+        expect(mage.magic).toEqual(52);
+
+        mage.takeDamage(20);
+        expect(mage.life).toEqual(10);
+        expect(mage.magic).toEqual(40);
+        
+        mage.takeDamage(10);
+        expect(mage.life).toEqual(0);
+        expect(mage.magic).toEqual(40);
+      });
+    });
+    
+    describe('RPG-поединки', () => {
+      it('Move', () => {
+        let player = new Warrior(6, "Алёша Попович");
+        expect(player.speed).toEqual(2);
+        expect(player.position).toEqual(6);
+        player.moveLeft(5);
+        expect(player.position).toEqual(4);
+        player.moveRight(2);
+        expect(player.position).toEqual(6);
+        player.moveRight(1);
+        expect(player.position).toEqual(7);
+      });
+      
+      it('isAttackBlocked', () => {
+        let player = new Warrior(6, "Алёша Попович");
+        
+        const luckValues = [0.5, 0.5, 0.5, 0.95];
+        let luckIndex = 0;
+        spyOn(player, 'getLuck').and.callFake(() => luckValues[luckIndex++]);
+        
+        expect(player.isAttackBlocked()).toEqual(false);
+        expect(player.isAttackBlocked()).toEqual(false);
+        expect(player.isAttackBlocked()).toEqual(false);
+        expect(player.isAttackBlocked()).toEqual(true);
+      });
+      
+      it('tryAttack', () => {
+        const warrior = new Warrior(0, 'Алёша Попович');   // speed 2, Sword range 1
+        const archer = new Archer(2, 'Леголас');           // life 80, position 2
+
+        expect(archer.life).toBe(80);
+        expect(archer.position).toBe(2);
+
+        // У защитника отключаем случайность: урон должен пройти
+        spyOn(archer, 'isAttackBlocked').and.returnValue(false);
+        spyOn(archer, 'dodged').and.returnValue(false);
+        
+        spyOn(warrior, 'getLuck').and.returnValues(
+          0.5, 0.5434,   // шаг 2: износ, урон
+          0.5, 0.4017,   // шаг 3: износ, урон
+        );
+
+        // Шаг 1: Алёша не достаёт
+        warrior.tryAttack(archer);
+        expect(archer.life).toBe(80);
+        expect(archer.position).toBe(2);
+
+        // Шаг 2: подошёл на 1, атака без удвоения
+        warrior.moveRight(1);
+        warrior.tryAttack(archer);
+        expect(archer.life).toBeCloseTo(60.98, 2);
+        expect(archer.position).toBe(2);
+
+        // Шаг 3: вплотную — удвоение + отскок
+        warrior.moveRight(1);
+        warrior.tryAttack(archer);
+        expect(archer.life).toBeCloseTo(32.86, 2);
+        expect(archer.position).toBe(3); 
       });
     });
   });
